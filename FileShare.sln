@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileShare", "FileShare\FileShare.csproj", "{38214F72-2CCA-4064-B363-98D85A14D2EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38214F72-2CCA-4064-B363-98D85A14D2EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38214F72-2CCA-4064-B363-98D85A14D2EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38214F72-2CCA-4064-B363-98D85A14D2EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38214F72-2CCA-4064-B363-98D85A14D2EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F8C2DA4-3427-4D15-A26C-2310E2307D88}
+	EndGlobalSection
+EndGlobal
