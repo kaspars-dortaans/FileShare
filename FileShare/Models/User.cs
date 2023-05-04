@@ -1,3 +1,5 @@
+using FileShare.Enums;
+
 namespace FileShare.Models;
 
 public class User
