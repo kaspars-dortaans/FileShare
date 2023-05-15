@@ -1,0 +1,9 @@
+@import './base.css';
+
+#app {
+  font-weight: normal;
+  width: inherit;
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+}
