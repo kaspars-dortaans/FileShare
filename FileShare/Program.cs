@@ -37,4 +37,15 @@ app.UseEndpoints(endpoints =>
         pattern: "api/{controller=Home}/{action=Index}/{id?}");
 });
 
+app.UseSpa(spa =>
+{
+    spa.Options.SourcePath = "client-app";
+
+    if (app.Environment.IsDevelopment())
+    {
+        var uri = $"http://{builder.Configuration["DevelopmentSettings:ViteHost"]}:{builder.Configuration["DevelopmentSettings:VitePort"]}";
+        spa.UseProxyToSpaDevelopmentServer(uri);
+    }
+});
+
 app.Run();

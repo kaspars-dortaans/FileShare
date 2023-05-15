@@ -11,6 +11,8 @@ using FileShare.ViewModels.Users;
 using Microsoft.AspNetCore.Mvc;
 
 [Authorize]
+[ApiController]
+[Route("api/[controller]/[action]")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -22,20 +24,23 @@ public class UsersController : ControllerBase
         _mapper = mapper;
     }
 
-    public IActionResult Register(RegisterUserViewModel model)
+    [AllowAnonymous]
+    [HttpPost]
+    public IActionResult Register([FromBody] RegisterUserViewModel model)
     {
         if (_userService.Exists(user => user.Username == model.Username))
             throw new AppException("User with given username already exists");
 
         var user = _mapper.Map<User>(model);
         user.PasswordHash = BCrypt.HashPassword(model.Password);
+        user.Role = Role.User;
         _userService.Add(user);
         return Ok();
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public IActionResult Authenticate(AuthenticateRequest model)
+    public IActionResult Authenticate([FromBody]AuthenticateRequest model)
     {
         var response = _userService.Authenticate(model);
         return Ok(response);
@@ -62,7 +67,7 @@ public class UsersController : ControllerBase
 
         var user = _userService.FindByIdOrDefault(id);
         if (user == null)
-            throw new KeyNotFoundException("User not found");\
+            throw new KeyNotFoundException("User not found");
 
         return Ok(_mapper.Map<UserViewModel>(user));
     }
