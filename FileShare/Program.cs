@@ -14,13 +14,23 @@ services.AddControllers();
 // configure strongly typed settings object
 services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
+services.AddScoped<DataSeeding>();
+
 services.AddScoped<IJwtUtils, JwtUtils>();
 services.AddScoped<IUserService, UserService>();
+services.AddScoped<ISettingsService, SettingsService>();
 
 //Add automapper
 services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    var scope = app.Services.CreateScope();
+    var dataSeeder = (DataSeeding?)scope.ServiceProvider.GetService(typeof(DataSeeding));
+    dataSeeder?.SeedData();
+}
 
 app.UseRouting();
 
