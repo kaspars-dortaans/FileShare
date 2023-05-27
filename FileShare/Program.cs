@@ -3,19 +3,29 @@ using FileShare.Helpers;
 using FileShare.Models;
 using FileShare.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 // Add services to the container.
-services.AddDbContext<DataContext>(opts => opts.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
+services.AddDbContext<DataContext>(opts => opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlDataBase")));
 services.AddControllers();
 
 // configure strongly typed settings object
 services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
+//azure storage
+services.AddAzureClients(configureClients =>
+{
+    configureClients.AddBlobServiceClient(builder.Configuration.GetConnectionString("AzureStorage"));
+});
+services.AddScoped<IAzureStorageHelper, AzureStorageHelper>();
+
+//data seeding
 services.AddScoped<DataSeeding>();
 
+//db services
 services.AddScoped<IJwtUtils, JwtUtils>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<ISettingsService, SettingsService>();
