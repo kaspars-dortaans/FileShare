@@ -20,6 +20,12 @@ public class BaseService<T> where T : class
         dbSet.Add(entity);
         _dataContext.SaveChanges();
     }
+    
+    public void Update(T entity)
+    {
+        dbSet.Update(entity);
+        _dataContext.SaveChanges();
+    }
 
     public T? FindByIdOrDefault(int id)
     {
@@ -31,6 +37,11 @@ public class BaseService<T> where T : class
         return dbSet;
     }
 
+    public T? GetFirstOrDefault(Expression<Func<T, bool>> predicate)
+    {
+        return dbSet.FirstOrDefault(predicate);
+    }
+
     public bool Exists(Expression<Func<T, bool>> predicate)
     {
         return dbSet.Any(predicate);
@@ -40,7 +51,9 @@ public class BaseService<T> where T : class
 public interface IBaseService<T> where T : class
 {
     public void Add(T entity);
+    public void Update(T entity);
     public T? FindByIdOrDefault(int id);
     public IQueryable<T> GetAll();
+    public T? GetFirstOrDefault(Expression<Func<T, bool>> predicate);
     public bool Exists(Expression<Func<T, bool>> predicate);
 }
