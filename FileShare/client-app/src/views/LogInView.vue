@@ -5,7 +5,7 @@
       <b-alert v-model="showErrorMessage" variant="danger">{{ errorMessage }}</b-alert>
       <b-form-input v-model="username" placeholder="Username"></b-form-input>
       <b-form-input type="password" v-model="password" placeholder="Password"></b-form-input>
-      <b-button @click="submit">Log in</b-button>
+      <b-button variant="primary" @click="submit">Log in</b-button>
       <p>Don't have an account <b-button :to="{ name: 'register' }">register</b-button></p>
     </div>
   </div>
