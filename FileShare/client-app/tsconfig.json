@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["unplugin-icons/types/vue"]
   },
 
   "references": [

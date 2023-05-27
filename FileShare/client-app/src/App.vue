@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { authorizationManagerInjectionKey } from './authorization/authorization-manager'
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
+import { Role } from '@/common/enums/role'
 
 const authManager = inject(authorizationManagerInjectionKey)!
+const showAdminPages = computed(() => authManager.userInfo.value?.role == Role.Admin)
 </script>
 
 <template>
@@ -13,7 +15,9 @@ const authManager = inject(authorizationManagerInjectionKey)!
       >Log Out</b-nav-item
     >
     <b-nav-item v-else :to="{ name: 'login' }">Log In</b-nav-item>
-    <b-nav-item :to="{ name: 'settings' }">Settings</b-nav-item>
+    <template v-if="showAdminPages">
+      <b-nav-item :to="{ name: 'settings' }">Settings</b-nav-item>
+    </template>
   </b-nav>
   <RouterView />
 </template>

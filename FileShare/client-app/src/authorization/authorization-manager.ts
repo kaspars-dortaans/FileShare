@@ -1,8 +1,9 @@
 import type { AuthenticateRequest } from '@/common/interfaces/view-models/user/authenticate-request'
 import type { AuthenticateResponse } from '@/common/interfaces/view-models/user/authenticate-response'
+import type { UserViewModel } from '@/common/interfaces/view-models/user/user-view-model'
 import { ApiError } from '@/services/api-error'
 import type { AxiosError, AxiosStatic } from 'axios'
-import { ref, type InjectionKey } from 'vue'
+import { ref, type InjectionKey, type Ref } from 'vue'
 import type { Router } from 'vue-router'
 
 const loginUrl = 'users/Authenticate'
@@ -17,6 +18,7 @@ export class AuthorizationManager {
   axios: AxiosStatic
   router: Router
   isLogedIn = ref(false)
+  userInfo: Ref<UserViewModel | null> = ref(null)
 
   constructor(axios: AxiosStatic, router: Router) {
     this.axios = axios
@@ -43,7 +45,7 @@ export class AuthorizationManager {
       }
     )
 
-    this._checkIfLogedIn()
+    this._updateState()
   }
 
   async login(request: AuthenticateRequest) {
@@ -58,7 +60,7 @@ export class AuthorizationManager {
     } catch (error) {
       throw new ApiError(error as AxiosError)
     } finally {
-      this._checkIfLogedIn()
+      this._updateState()
     }
   }
 
@@ -68,12 +70,23 @@ export class AuthorizationManager {
     if (logoutRedirectRoute) {
       this.router.push({ name: logoutRedirectRoute })
     }
-    this._checkIfLogedIn()
+    this._updateState()
   }
 
-  _checkIfLogedIn() {
-    this.isLogedIn.value =
-      !!window.localStorage.getItem(tokenKey) && !!window.localStorage.getItem(userInformationKey)
+  getUserInfo(): UserViewModel | null {
+    const infoJson = window.localStorage.getItem(userInformationKey)
+    if (!infoJson) {
+      return null
+    }
+
+    return JSON.parse(infoJson)
+  }
+
+  _updateState() {
+    const userInfo = window.localStorage.getItem(userInformationKey)
+    this.userInfo.value = userInfo ? JSON.parse(userInfo) : null
+
+    this.isLogedIn.value = !!window.localStorage.getItem(tokenKey) && !!userInfo
   }
 }
 
