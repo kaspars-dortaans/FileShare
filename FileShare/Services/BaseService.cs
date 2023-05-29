@@ -20,16 +20,27 @@ public class BaseService<T> where T : class
         dbSet.Add(entity);
         _dataContext.SaveChanges();
     }
-    
+
     public void Update(T entity)
     {
         dbSet.Update(entity);
         _dataContext.SaveChanges();
     }
 
+    public void Remove(T entity)
+    {
+        dbSet.Remove(entity);
+        _dataContext.SaveChanges();
+    }
+
     public T? FindByIdOrDefault(int id)
     {
         return dbSet.Find(id);
+    }
+
+    public IQueryable<T> Get(Expression<Func<T, bool>> predicate)
+    {
+        return dbSet.Where(predicate);
     }
 
     public IQueryable<T> GetAll()
@@ -50,10 +61,12 @@ public class BaseService<T> where T : class
 
 public interface IBaseService<T> where T : class
 {
-    public void Add(T entity);
-    public void Update(T entity);
-    public T? FindByIdOrDefault(int id);
-    public IQueryable<T> GetAll();
-    public T? GetFirstOrDefault(Expression<Func<T, bool>> predicate);
-    public bool Exists(Expression<Func<T, bool>> predicate);
+    void Add(T entity);
+    void Update(T entity);
+    void Remove(T entity);
+    T? FindByIdOrDefault(int id);
+    IQueryable<T> Get(Expression<Func<T, bool>> predicate);
+    IQueryable<T> GetAll();
+    T? GetFirstOrDefault(Expression<Func<T, bool>> predicate);
+    bool Exists(Expression<Func<T, bool>> predicate);
 }

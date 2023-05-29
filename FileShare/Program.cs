@@ -29,6 +29,7 @@ services.AddScoped<DataSeeding>();
 services.AddScoped<IJwtUtils, JwtUtils>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<ISettingsService, SettingsService>();
+services.AddScoped<IFileService, FileService>();
 
 //Add automapper
 services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

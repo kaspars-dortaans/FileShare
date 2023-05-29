@@ -10,9 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FileShare.Controllers;
 
 [Authorize(Role.Admin)]
-[ApiController]
-[Route("api/[controller]/[action]")]
-public class SettingController : ControllerBase
+public class SettingController : BaseController
 {
     private readonly ISettingsService _settingsService;
     private readonly IMapper _mapper;
@@ -30,7 +28,7 @@ public class SettingController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult EditSetting(int id)
+    public IActionResult GetSettingFormData(int id)
     {
         var setting = _settingsService.FindByIdOrDefault(id) ?? throw new AppException("Setting with given Id was not found");
         var settingViewModel = _mapper.Map<SettingViewModel>(setting);

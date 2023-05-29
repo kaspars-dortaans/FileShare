@@ -10,10 +10,7 @@ using FileShare.Services;
 using FileShare.ViewModels.Users;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
-[ApiController]
-[Route("api/[controller]/[action]")]
-public class UsersController : ControllerBase
+public class UsersController : BaseController
 {
     private readonly IUserService _userService;
     private readonly IMapper _mapper;
