@@ -19,3 +19,11 @@
   justify-content: center;
   align-items: baseline;
 }
+
+.sticky-header-table {
+  border-collapse: separate;
+}
+
+.sticky-header-table th {
+  background-color: white;
+}

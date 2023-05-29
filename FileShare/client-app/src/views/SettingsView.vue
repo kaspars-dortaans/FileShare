@@ -1,6 +1,13 @@
 <template>
   <h4 class="my-3">Settings</h4>
-  <b-table :items="settingList" :fields="fields" primary-key="id" :busy="showSpinner">
+  <b-table
+    :items="settingList"
+    :fields="fields"
+    primary-key="id"
+    :busy="showSpinner"
+    responsive
+    sticky-header
+  >
     <template #cell(actions)="data">
       <div class="action-buttons">
         <b-button variant="outline-dark" class="icon-btn" @click="editSetting(data.item)"

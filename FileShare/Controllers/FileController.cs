@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Conventions;
 using FileShare.Dto;
 using FileShare.Enums;
 using FileShare.Helpers;
@@ -6,6 +7,7 @@ using FileShare.Services;
 using FileShare.ViewModels.Files;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using System.Linq;
 
 namespace FileShare.Controllers;
 
@@ -25,9 +27,15 @@ public class FileController : BaseController
     }
 
     [HttpGet]
-    public IActionResult GetFiles()
+    public IActionResult GetFiles(int? currentPage, int? pageSize)
     {
         var files = _fileService.Get(file => file.OwnerUserId == user.Id);
+        if(currentPage.HasValue && pageSize.HasValue)
+        {
+            files = files
+                .Skip((currentPage.Value - 1) * pageSize.Value)
+                .Take(pageSize.Value);
+        }
         return Ok(_mapper.Map<IEnumerable<FileListItem>>(files));
     }
 
