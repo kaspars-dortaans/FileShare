@@ -10,29 +10,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, toRefs, watch } from 'vue'
 import { BFormInput } from 'bootstrap-vue-next'
 
 const props = defineProps({
   modelValue: String
 })
+const modelValue = toRefs(props).modelValue!
 
 const emit = defineEmits(['update:model-value'])
 
 const width = ref(0)
 const height = ref(0)
-
-onMounted(() => {
-  const split = props.modelValue?.split('*')
-  if (split?.length === 2) {
-    width.value = parseInt(split[0].trim())
-    height.value = parseInt(split[1].trim())
-  } else {
-    width.value = 0
-    height.value = 0
-    updateModelValue(size.value)
-  }
-})
 
 const size = computed(() => {
   return `${width.value} * ${height.value}`
@@ -45,6 +34,21 @@ const updateModelValue = (value: string) => {
 watch(size, (value: string) => {
   updateModelValue(value)
 })
+
+watch(
+  modelValue!,
+  (value: string | undefined) => {
+    const split = value?.split('*')
+    if (split?.length === 2) {
+      width.value = parseInt(split[0].trim())
+      height.value = parseInt(split[1].trim())
+    } else {
+      width.value = 0
+      height.value = 0
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

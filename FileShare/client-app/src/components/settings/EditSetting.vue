@@ -1,7 +1,7 @@
 <template>
   <b-modal v-model="modalVisible" title="Edit Setting" ok-title="Save Setting" @ok="onSubmit">
     <b-overlay :show="!loadedState">
-      <Form as="b-form" :validation-schema="validationSchema" @submit="onSubmit($event as Event)">
+      <b-form>
         <b-form-group label="Name">
           <b-form-input v-model="model.name" disabled />
         </b-form-group>
@@ -9,14 +9,15 @@
           <b-form-input v-model="model.description" />
         </b-form-group>
         <b-form-group label="Value">
-          <Field name="Value" v-model="model.value" v-slot="{ field }">
-            <valueValidation.component v-bind="field" :placeholder="valueValidation.placeholder" />
-          </Field>
-          <ErrorMessage name="Value" as="b-form-invalid-feedback" v-slot="{ message }" force-show>
-            {{ message }}
-          </ErrorMessage>
+          <settingValueFieldInfo.component
+            v-model="settingValue"
+            :placeholder="settingValueFieldInfo.placeholder"
+          />
+          <b-form-invalid-feedback force-show>
+            {{ settingValueError }}
+          </b-form-invalid-feedback>
         </b-form-group>
-      </Form>
+      </b-form>
     </b-overlay>
   </b-modal>
 </template>
@@ -24,7 +25,7 @@
 <script setup lang="ts">
 import type { SettingViewModel } from '@/common/interfaces/view-models/setting/setting-view-model'
 import { ref, reactive, computed, type Component } from 'vue'
-import { Form, Field, ErrorMessage } from 'vee-validate'
+import { useField } from 'vee-validate'
 import { SettingDataType } from '@/common/enums/data-types'
 import { BFormInput } from 'bootstrap-vue-next'
 import SizeInput from '@/components/form/SizeInput.vue'
@@ -44,31 +45,56 @@ const model: SettingViewModel = reactive({
 })
 const loadedState = ref(false)
 
-const valueValidation = computed(() => {
+const validateSettignValue = function (value: string) {
+  return settingValueFieldInfo.value.validate(value)
+}
+
+const {
+  value: settingValue,
+  errorMessage: settingValueError,
+  validate
+} = useField<string>('Value', validateSettignValue)
+
+const validateWithRegex = function (value: string | undefined, regex: RegExp) {
+  if (!value) {
+    return 'Field Value is required'
+  }
+  const match = !!value.match(regex)
+  return match ? true : 'The Value field format is invalid'
+}
+
+const settingValueFieldInfo = computed(() => {
   let component: Component = BFormInput,
-    rules: string | object = '',
+    validate: (value: string) => boolean | string = (value: string) =>
+      !value ? 'Field Value is required' : true,
     placeholder = 'Setting Value'
-  const set = (setComponent: Component, setRules: string | object, setPlaceholder: string) => {
+
+  const set = (
+    setComponent: Component,
+    setValidate: (value: string) => boolean | string,
+    setPlaceholder: string
+  ) => {
     component = setComponent
-    rules = setRules
+    validate = setValidate
     placeholder = setPlaceholder
   }
 
   switch (model.dataType) {
     case SettingDataType.Size:
-      set(SizeInput, { regex: /\d+\s\*\s\d+/ }, '')
+      set(SizeInput, (value: string) => validateWithRegex(value, /\d+\s\*\s\d+/), '')
       break
     case SettingDataType.StringList:
-      set(BFormInput, { regex: /^[\w\.]+(,\s*[\w\.]+)*$/ }, "Format: 'item1, itme2, itme3...'")
+      set(
+        BFormInput,
+        (value: string) => validateWithRegex(value, /^[\w\.]+(,\s*[\w\.]+)*$/),
+        "Format: 'item1, itme2, itme3...'"
+      )
+      break
+    case SettingDataType.PositiveInteger:
+      set(BFormInput, (value: string) => validateWithRegex(value, /\d+/), 'e.g. 200')
       break
   }
-  return { component, rules, placeholder }
-})
-
-const validationSchema = computed(() => {
-  return {
-    Value: valueValidation.value.rules
-  }
+  return { component, validate, placeholder }
 })
 
 const editSetting = async (id: number) => {
@@ -78,6 +104,7 @@ const editSetting = async (id: number) => {
   try {
     const formData = await SettingsService.getEditSettingData(id)
     Object.assign(model, formData)
+    settingValue.value = model.value
   } catch (err) {
     toast.error((err as AxiosError).message)
     modalVisible.value = false
@@ -87,8 +114,14 @@ const editSetting = async (id: number) => {
 
 const onSubmit = async (e: Event) => {
   e.preventDefault()
+  const validationResult = await validate()
+  if (!validationResult?.valid) {
+    return
+  }
+
   loadedState.value = false
   try {
+    model.value = settingValue.value
     await SettingsService.editSetting(model)
     toast.success('Setting was successfully saved')
     modalVisible.value = false

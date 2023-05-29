@@ -1,5 +1,6 @@
 export enum SettingDataType {
   String,
   Size,
-  StringList
+  StringList,
+  PositiveInteger
 }

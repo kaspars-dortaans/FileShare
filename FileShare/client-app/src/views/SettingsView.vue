@@ -49,11 +49,3 @@ const fetchData = async () => {
   showSpinner.value = false
 }
 </script>
-
-<style scoped>
-.action-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-}
-</style>
