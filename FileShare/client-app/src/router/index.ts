@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import LogInView from '@/views/LogInView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import FileView from '@/views/FileView.vue'
 
 export const routes = [
   {
@@ -24,6 +25,11 @@ export const routes = [
     path: '/register',
     name: 'register',
     component: RegisterView
+  },
+  {
+    path: '/files',
+    name: 'files',
+    component: FileView
   }
 ]
 

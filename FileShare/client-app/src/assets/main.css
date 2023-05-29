@@ -8,6 +8,12 @@
   flex-direction: column;
 }
 
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
 .icon-btn {
   display: flex;
   justify-content: center;
