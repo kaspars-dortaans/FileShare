@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.Configuration.Conventions;
 using FileShare.Dto;
 using FileShare.Enums;
 using FileShare.Helpers;
@@ -7,7 +6,7 @@ using FileShare.Services;
 using FileShare.ViewModels.Files;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using System.Linq;
+using ImageMagick;
 
 namespace FileShare.Controllers;
 
@@ -46,6 +45,8 @@ public class FileController : BaseController
         {
             throw new AppException("Required file was not received");
         }
+        var image = new MagickImageInfo(model.File.OpenReadStream());
+
         var file = _mapper.Map<Models.File>(model);
         var fileInfo = new FileInfo(model.File.FileName);
         file.Extension = fileInfo.Extension;
