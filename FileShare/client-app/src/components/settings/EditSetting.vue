@@ -9,10 +9,7 @@
           <b-form-input v-model="model.description" />
         </b-form-group>
         <b-form-group label="Value">
-          <settingValueFieldInfo.component
-            v-model="settingValue"
-            :placeholder="settingValueFieldInfo.placeholder"
-          />
+          <settingValueFieldInfo.component v-model="settingValue" :placeholder="settingValueFieldInfo.placeholder" />
           <b-form-invalid-feedback force-show>
             {{ settingValueError }}
           </b-form-invalid-feedback>
@@ -91,7 +88,7 @@ const settingValueFieldInfo = computed(() => {
       )
       break
     case SettingDataType.PositiveInteger:
-      set(BFormInput, (value: string) => validateWithRegex(value, /\d+/), 'e.g. 200')
+      set(BFormInput, (value: string) => validateWithRegex(value, /^[0-9]+$/), 'e.g. 200')
       break
   }
   return { component, validate, placeholder }

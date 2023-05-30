@@ -9,19 +9,9 @@
           <b-form-input v-model="model.comment" placeholder="This is my file" />
         </b-form-group>
         <b-form-group label="File">
-          <Field
-            v-if="!isEdit"
-            name="File"
-            v-model="model.file"
-            v-slot="{ handleChange, handleBlur }"
-          >
-            <input
-              ref="fileInput"
-              type="file"
-              class="form-control"
-              @change="handleChange"
-              @blur="handleBlur"
-            />
+          <Field v-if="!isEdit" name="File" v-model="model.file" v-slot="{ handleChange, handleBlur }">
+            <input ref="fileInput" type="file" class="form-control" :accept="formData.allowedExtensions ?? undefined"
+              @change="handleChange" @blur="handleBlur" />
           </Field>
           <b-form-input v-else v-model="fullFileName" disabled />
           <ErrorMessage name="File" as="b-form-invalid-feedback" v-slot="{ message }" force-show>
@@ -42,6 +32,7 @@ import type { AxiosError } from 'axios'
 import { FileService } from '@/services/files-service'
 import type { FileListItem } from '@/common/interfaces/view-models/file/file-list-item'
 import { GetBlobUrlData } from '@/common/utils/file-utils'
+import type { FileFormData } from '@/common/interfaces/view-models/file/file-form-data'
 
 const emit = defineEmits(['completed'])
 
@@ -49,19 +40,25 @@ const form = ref<InstanceType<typeof Form> | null>(null)
 const fileInput = ref<InstanceType<typeof HTMLInputElement> | null>(null)
 
 const modalVisible = ref(false)
-const loadedState = ref(false)
-const model: FileViewModel = reactive({
+const loadedState = ref(true)
+const formData: FileFormData = reactive({
   id: null,
   name: '',
-  comment: '',
-  file: null,
+  comment: null,
   minSize: null,
   maxFileSize: null,
-  extension: null
+  extension: null,
+  allowedExtensions: null
+})
+
+const model: FileViewModel = reactive({
+  name: '',
+  comment: '',
+  file: null
 })
 
 const isEdit = computed(() => {
-  return !!model.id
+  return !!formData.id
 })
 
 const title = computed(() => {
@@ -69,7 +66,7 @@ const title = computed(() => {
 })
 
 const fullFileName = computed(() => {
-  return `${model.name}${model.extension}`
+  return `${model.name}${formData.extension}`
 })
 
 const validationSchema = computed(() => {
@@ -79,26 +76,36 @@ const validationSchema = computed(() => {
 })
 
 const fileValidation = async function (file: File) {
+  //reqiured
   if (!file) {
     return 'The File field is required'
   }
 
-  if (model.maxFileSize && file.size / 1024 ** 2 > model.maxFileSize) {
-    return `Selected file size is too big, max file size is ${model.maxFileSize} MB`
+  //file extensions
+  const dotIndex = file.name.lastIndexOf(".")
+  const fileExtension = dotIndex < 0 ? "" : file.name.substring(dotIndex)
+  const allowedxtensions = formData.allowedExtensions?.split(", ");
+  if (allowedxtensions && !allowedxtensions.some((extension) => extension === fileExtension)) {
+    return "File with given extension is not allowed";
   }
 
-  if (!model.minSize || !model.file?.type.includes('image')) {
+  //max file size
+  if (Number.isInteger(formData.maxFileSize) && file.size > formData.maxFileSize! * 1024 * 1024) {
+    return `Selected file size is too big, max file size is ${formData.maxFileSize} MB`
+  }
+
+  if (!formData.minSize || !model.file?.type.includes('image')) {
     return true
   }
 
+  //min image size
   const image = new Image()
   image.src = await GetBlobUrlData(file)
   await image.decode()
 
-  if (image.width < model.minSize!.width || image.height < model.minSize!.height) {
-    return `Image dimensions are too small, minimal dimensions: ${model.minSize!.width} * ${
-      model.minSize!.height
-    }`
+  if (image.width < formData.minSize!.width || image.height < formData.minSize!.height) {
+    return `Image dimensions are too small, minimal dimensions: ${formData.minSize!.width} * ${formData.minSize!.height
+      }`
   }
   return true
 }
@@ -115,9 +122,15 @@ const fetchData = async function (fileId?: number) {
   loadedState.value = false
   modalVisible.value = true
 
-  const formData = await FileService.getFileFormData(fileId)
-  Object.assign(model, formData)
-  fileInput.value!.value = ''
+  const response = await FileService.getFileFormData(fileId)
+  Object.assign(formData, response)
+  model.name = response.name ?? ""
+  model.comment = response.comment ?? ""
+
+  if (fileInput?.value) {
+    fileInput.value.value = ''
+  }
+
   form.value?.resetForm()
 
   loadedState.value = true
@@ -135,18 +148,20 @@ const onSubmit = async function (e: Event) {
 
   try {
     if (isEdit.value) {
-      await FileService.editFile(model as FileListItem)
-      toast.success('Toast was successfully saved')
+      const rq: FileListItem = {
+        id: formData.id!,
+        ...model
+      }
+      await FileService.editFile(rq)
+
+      toast.success('File was successfully saved')
     } else {
       const formData = new FormData()
-      formData.append(
-        'name',
-        model.name ?? model.file?.name.substring(0, model.file.name.lastIndexOf('.'))
-      )
-      formData.append('comment', model.comment ?? '')
+      formData.append('name', model.name || model.file!.name.substring(0, model.file!.name.lastIndexOf('.')))
+      formData.append('comment', model.comment)
       formData.append('file', model.file as Blob)
       await FileService.addFile(formData)
-      toast.success('Toast was successfully added')
+      toast.success('File was successfully added')
     }
     emit('completed')
     modalVisible.value = false

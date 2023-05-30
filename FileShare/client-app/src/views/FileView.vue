@@ -6,15 +6,8 @@
         <i-ic-baseline-plus />Add File
       </b-button>
     </div>
-    <b-table
-      :items="fileList"
-      :fields="fields"
-      :busy="isFetchingData"
-      table-class="sticky-header-table"
-      sticky-header
-      responsive
-      ref="table"
-    >
+    <b-table :items="fileList" :fields="fields" :busy="isFetchingData" table-class="sticky-header-table" sticky-header
+      responsive ref="table">
       <template #cell(actions)="data">
         <div class="action-buttons">
           <b-button variant="outline-dark" class="icon-btn" @click="downloadFile(data.item)">
@@ -89,6 +82,7 @@ const getFileList = async function () {
     fileList.value = fileList.value.concat(newFiles)
   } catch (err) {
     toast.error((err as AxiosError).message)
+    allFetched = true
   }
   isFetchingData.value = false
 }
@@ -109,7 +103,7 @@ const downloadFile = async function (item: FileListItem) {
     const response = await FileService.downloadFile(item.id)
     const contentDisposition = (response.headers['content-disposition'] as string) ?? ''
     const nameIndex = contentDisposition.indexOf('=')
-    const name = nameIndex < 0 ? '' : contentDisposition.substring(nameIndex + 1)
+    const name = nameIndex < 0 ? '' : contentDisposition.substring(nameIndex + 1).replace(/[\'\"]/g, "")
     const blob = new Blob([response.data], { type: response.headers['content-type'] })
     DownloadFile(blob, name)
   } catch (err) {

@@ -6,6 +6,7 @@ public class FilesProfile : AutoMapper.Profile
     {
         CreateMap<Models.File, FileListItem>()
             .ForMember(d => d.Name, o => o.MapFrom(s => $"{s.Name}{s.Extension}"));
+        CreateMap<Models.File, FileFormData>();
         CreateMap<Models.File, FileViewModel>().ReverseMap();
     }
 }

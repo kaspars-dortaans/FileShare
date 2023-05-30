@@ -106,20 +106,25 @@ public class FileController : BaseController
     [HttpGet]
     public IActionResult GetFileFormData(int? id)
     {
-        FileViewModel formData;
+        FileFormData formData;
         if (id.HasValue)
         {
             var file = _fileService.FindByIdOrDefault(id.Value) ?? throw new AppException("File with given id was not found");
-            formData = _mapper.Map<FileViewModel>(file);
+            formData = _mapper.Map<FileFormData>(file);
         }
         else
         {
             formData = new();
-            formData.MinSize = new Size(_settingsService.GetSettingValue(SettingType.MinImageSize));
+            var minImageSize = new Size(_settingsService.GetSettingValue(SettingType.MinImageSize));
+            if(minImageSize.Valid)
+            {
+                formData.MinSize = minImageSize;
+            }
             if (int.TryParse(_settingsService.GetSettingValue(SettingType.MaxFileSize), out int maxFileSize))
             {
                 formData.MaxFileSize = maxFileSize;
-            }   
+            }
+            formData.AllowedExtensions = _settingsService.GetSettingValue(SettingType.FileExtensions);
         }
         return Ok(formData);
     }
