@@ -41,19 +41,51 @@ public class FileController : BaseController
     [HttpPost]
     public IActionResult AddFIle([FromForm] FileViewModel model)
     {
-        if(model.File == null)
+        //Note: Consider making attributes for validation
+        //Extensions validation
+        var allowedExtensions = _settingsService.GetSettingValue(SettingType.FileExtensions)?.Split(", ");
+        var fileInfo = new FileInfo(model.File.FileName);
+        if (allowedExtensions != null && !allowedExtensions.Contains(fileInfo.Extension))
         {
-            throw new AppException("Required file was not received");
+            throw new AppException("Uploaded file extension is not allowed");
         }
-        var image = new MagickImageInfo(model.File.OpenReadStream());
+
+        //Max file size validation
+        var allowedFileSize = _settingsService.GetSettingValue(SettingType.MaxFileSize);
+        if(allowedFileSize != null)
+        {
+            if(int.TryParse(allowedFileSize, out var maxFileSize)){
+                if (model.File.Length > maxFileSize * 1024 * 1024)
+                {
+                    throw new AppException($"Uploaded file size exceeds allowed file size ({maxFileSize}MB)");
+                }
+            }
+        }
+
+        Stream? resizedImageReadStream = null;
+        //Image size validaiton
+        if (model.File.ContentType.Contains("image"))
+        {
+            var image = new MagickImage(model.File.OpenReadStream());
+            var maxSize = new Size(_settingsService.GetSettingValue(SettingType.MaxImageSize));
+            var minSize = new Size(_settingsService.GetSettingValue(SettingType.MinImageSize));
+            if(minSize.Valid && (image.Width < minSize.Width || image.Height < minSize.Height))
+            {
+                throw new AppException("Image size does not reach minimal allowed image size");
+            }
+            if(maxSize.Valid && (image.Width > maxSize.Width || image.Height > maxSize.Height)){
+                image.Resize(maxSize.Width, maxSize.Height);
+                resizedImageReadStream = new MemoryStream(image.ToByteArray());
+            }
+        }
 
         var file = _mapper.Map<Models.File>(model);
-        var fileInfo = new FileInfo(model.File.FileName);
+        
         file.Extension = fileInfo.Extension;
         file.AzureFileName = AzureFileName(file.Name, file.Extension);
         file.OwnerUserId = user.Id;
         _fileService.Add(file);
-        _azureStorageHelper.UploadFile(model.File.OpenReadStream(), file.AzureFileName);
+        _azureStorageHelper.UploadFile(resizedImageReadStream ?? model.File.OpenReadStream(), file.AzureFileName);
         return Ok();
     }
 

@@ -51,7 +51,7 @@ public class UsersController : BaseController
         return Ok(_mapper.Map<IEnumerable<UserViewModel>>(users));
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet]
     public IActionResult GetById(int id)
     {
         // only admins can access other user records

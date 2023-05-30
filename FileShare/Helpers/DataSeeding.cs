@@ -1,5 +1,4 @@
 ﻿using FileShare.Models;
-using FileShare.ViewModels.Setting;
 
 namespace FileShare.Helpers;
 
@@ -25,7 +24,7 @@ public class DataSeeding
                             Type = setting.Key,
                             DataType = setting.Value.dataType,
                             Description = string.Empty,
-                            Value = string.Empty
+                            Value = null
                         };
                     });
             _context.AddRange(newSettomgs);
