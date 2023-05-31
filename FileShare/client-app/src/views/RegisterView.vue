@@ -75,6 +75,7 @@
 import type { RegisterUserViewModel } from '@/common/interfaces/view-models/user/register-user-view-model'
 import { UserService } from '@/services/user-service'
 import { Form, Field, ErrorMessage } from 'vee-validate'
+import { localize } from '@vee-validate/i18n'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
@@ -101,6 +102,15 @@ const validationSchema = {
   'Confirm Password': 'required|confirmed:@Password'
 }
 
+localize('en', {
+  fields: {
+    Password: {
+      regex:
+        'Password must consist of at lease one uppercase letter, lowercase letter, digit and special character. And it must be at least 8 characters long!'
+    }
+  }
+})
+
 const onSubmit = async () => {
   try {
     showSpinner.value = true
@@ -123,7 +133,7 @@ const onSubmit = async () => {
 }
 
 .register-form {
-  min-width: 18rem;
+  width: 25rem;
   margin: auto;
   display: flex;
   flex-direction: column;

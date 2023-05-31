@@ -8,8 +8,8 @@ using FileShare.ViewModels.Users;
 
 public class UserService : BaseService<User>, IUserService
 {
-    private DataContext _context;
-    private IJwtUtils _jwtUtils;
+    private readonly DataContext _context;
+    private readonly IJwtUtils _jwtUtils;
 
     public UserService(
         DataContext dataContext,

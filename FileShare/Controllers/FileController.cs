@@ -39,7 +39,7 @@ public class FileController : BaseController
     }
 
     [HttpPost]
-    public IActionResult AddFIle([FromForm] FileViewModel model)
+    public IActionResult AddFile([FromForm] FileViewModel model)
     {
         //Note: Consider making attributes for validation
         //Extensions validation

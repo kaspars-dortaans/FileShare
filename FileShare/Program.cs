@@ -36,6 +36,7 @@ services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
+//dev data seeding
 if (app.Environment.IsDevelopment())
 {
     var scope = app.Services.CreateScope();
